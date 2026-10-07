@@ -1,15 +1,23 @@
+import { cookies } from "next/headers";
+import AppSidebar from "@/components/dashboard/AppSidebar";
 import TopBar from "@/components/dashboard/TopBar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { getSidebarData } from "@/lib/dashboard";
 
-export default function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
+export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
   return (
-    <div className="flex h-screen flex-col">
-      <TopBar />
-      <div className="flex min-h-0 flex-1">
-        <aside className="w-64 shrink-0 border-r border-border p-4">
-          <h2>Sidebar</h2>
-        </aside>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
-    </div>
+    <TooltipProvider>
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppSidebar {...getSidebarData()} />
+        <SidebarInset>
+          <TopBar />
+          <main className="flex-1 p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }

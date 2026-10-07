@@ -24,3 +24,4 @@ Completed
 - Project setup and boilerplate cleanup
 - Mock data for dashboard UI
 - Dashboard UI Phase 1 (shadcn setup, /dashboard layout, dark mode, top bar with search, New Collection and New Item buttons)
+- Dashboard UI Phase 2 (collapsible sidebar with type links and counts, favorite and recent collections, user avatar area, sidebar toggle, mobile drawer)
