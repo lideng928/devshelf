@@ -6,7 +6,7 @@
 
 <!-- Not Started|In Progress|Completed -->
 
-Not Started
+Completed
 
 ## Goals
 
@@ -22,3 +22,5 @@ Not Started
 
 - Initial Next.js setup (Create Next App)
 - Project setup and boilerplate cleanup
+- Mock data for dashboard UI
+- Dashboard UI Phase 1 (shadcn setup, /dashboard layout, dark mode, top bar with search, New Collection and New Item buttons)
