@@ -25,6 +25,7 @@ export interface TypeSummary {
   slug: string;
   name: string;
   icon: string;
+  color: string;
 }
 
 export interface DashboardStats {
@@ -57,11 +58,15 @@ export interface DashboardCollection {
   updatedAt: string;
 }
 
+export interface CollectionStats {
+  collections: number;
+  favoriteCollections: number;
+}
+
 export interface DashboardData {
   firstName: string;
-  stats: DashboardStats;
+  itemStats: Pick<DashboardStats, "items" | "favoriteItems">;
   pinnedItems: DashboardItem[];
-  recentCollections: DashboardCollection[];
   recentItems: DashboardItem[];
 }
 

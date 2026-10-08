@@ -31,28 +31,6 @@ export const ITEM_TYPE_TEXT_CLASSES: Record<string, string> = {
   url: "text-cyan-500",
 };
 
-// Soft background + border for icon tiles.
-export const ITEM_TYPE_TILE_CLASSES: Record<string, string> = {
-  snippet: "bg-blue-500/10 border-blue-500/25",
-  prompt: "bg-violet-500/10 border-violet-500/25",
-  note: "bg-amber-500/10 border-amber-500/25",
-  command: "bg-emerald-500/10 border-emerald-500/25",
-  file: "bg-slate-400/10 border-slate-400/25",
-  image: "bg-rose-500/10 border-rose-500/25",
-  url: "bg-cyan-500/10 border-cyan-500/25",
-};
-
-// Gradient start color for collection cards.
-export const ITEM_TYPE_GRADIENT_CLASSES: Record<string, string> = {
-  snippet: "from-blue-500/10",
-  prompt: "from-violet-500/10",
-  note: "from-amber-500/10",
-  command: "from-emerald-500/10",
-  file: "from-slate-400/10",
-  image: "from-rose-500/10",
-  url: "from-cyan-500/10",
-};
-
 export const ITEM_TYPE_BG_CLASSES: Record<string, string> = {
   snippet: "bg-blue-500",
   prompt: "bg-violet-500",

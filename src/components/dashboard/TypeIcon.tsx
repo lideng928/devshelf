@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils";
-import {
-  ITEM_TYPE_ICONS,
-  ITEM_TYPE_TEXT_CLASSES,
-  ITEM_TYPE_TILE_CLASSES,
-} from "@/lib/item-types";
+import { ITEM_TYPE_ICONS } from "@/lib/item-types";
+import { typeColorVar } from "@/lib/type-color";
 import type { TypeSummary } from "@/types/dashboard";
 
 const SIZE_CLASSES = {
@@ -23,11 +20,10 @@ export default function TypeIcon({ type, size = "md" }: TypeIconProps) {
   return (
     <span
       title={type.name}
+      style={typeColorVar(type.color)}
       className={cn(
-        "flex shrink-0 items-center justify-center border",
+        "flex shrink-0 items-center justify-center border border-(--type-color)/25 bg-(--type-color)/10 text-(--type-color)",
         SIZE_CLASSES[size],
-        ITEM_TYPE_TILE_CLASSES[type.slug],
-        ITEM_TYPE_TEXT_CLASSES[type.slug],
       )}
     >
       {Icon && <Icon />}

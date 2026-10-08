@@ -8,7 +8,6 @@ import {
   type ItemType,
 } from "@/lib/mock-data";
 import type {
-  DashboardCollection,
   DashboardData,
   DashboardItem,
   SidebarCollection,
@@ -17,7 +16,6 @@ import type {
 } from "@/types/dashboard";
 
 const RECENT_COLLECTIONS_LIMIT = 5;
-const DASHBOARD_COLLECTIONS_LIMIT = 8;
 const RECENT_ITEMS_LIMIT = 10;
 const CODE_TYPE_SLUGS = new Set(["snippet", "command"]);
 
@@ -30,7 +28,7 @@ function getType(typeId: string): ItemType | undefined {
 }
 
 function toTypeSummary(type: ItemType): TypeSummary {
-  return { slug: type.slug, name: type.name, icon: type.icon };
+  return { slug: type.slug, name: type.name, icon: type.icon, color: type.color };
 }
 
 // Item types in a collection, most frequent first.
@@ -116,21 +114,6 @@ function toDashboardItem(item: Item): DashboardItem | null {
   };
 }
 
-function toDashboardCollection(collection: Collection): DashboardCollection {
-  const types = getCollectionTypes(collection.id).map(toTypeSummary);
-  return {
-    id: collection.id,
-    name: collection.name,
-    description: collection.description,
-    isFavorite: collection.isFavorite,
-    href: `/collections/${collection.id}`,
-    itemCount: items.filter((item) => item.collectionIds.includes(collection.id)).length,
-    dominantType: types[0] ?? null,
-    types,
-    updatedAt: collection.updatedAt,
-  };
-}
-
 function toDashboardItems(source: Item[]): DashboardItem[] {
   return source
     .map(toDashboardItem)
@@ -140,17 +123,11 @@ function toDashboardItems(source: Item[]): DashboardItem[] {
 export function getDashboardData(): DashboardData {
   return {
     firstName: currentUser.name.split(" ")[0],
-    stats: {
+    itemStats: {
       items: items.length,
-      collections: collections.length,
       favoriteItems: items.filter((item) => item.isFavorite).length,
-      favoriteCollections: collections.filter((c) => c.isFavorite).length,
     },
     pinnedItems: toDashboardItems(items.filter((item) => item.isPinned).sort(byUpdatedAtDesc)),
-    recentCollections: [...collections]
-      .sort(byUpdatedAtDesc)
-      .slice(0, DASHBOARD_COLLECTIONS_LIMIT)
-      .map(toDashboardCollection),
     recentItems: toDashboardItems([...items].sort(byUpdatedAtDesc).slice(0, RECENT_ITEMS_LIMIT)),
   };
 }

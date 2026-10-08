@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/format";
-import { ITEM_TYPE_GRADIENT_CLASSES } from "@/lib/item-types";
+import { typeColorVar } from "@/lib/type-color";
 import type { DashboardCollection } from "@/types/dashboard";
 import SectionHeader from "./SectionHeader";
 import TypeIcon from "./TypeIcon";
+
+const NEUTRAL_COLOR = "var(--color-foreground)";
 
 function CollectionCard({ collection }: { collection: DashboardCollection }) {
   const { dominantType } = collection;
@@ -13,10 +15,8 @@ function CollectionCard({ collection }: { collection: DashboardCollection }) {
   return (
     <Link
       href={collection.href}
-      className={cn(
-        "flex flex-col gap-3 rounded-xl bg-card bg-linear-to-br to-transparent p-4 ring-1 ring-foreground/10 transition-colors hover:ring-foreground/20",
-        dominantType && ITEM_TYPE_GRADIENT_CLASSES[dominantType.slug],
-      )}
+      style={typeColorVar(dominantType?.color ?? NEUTRAL_COLOR)}
+      className="flex flex-col gap-3 rounded-xl border border-(--type-color)/30 bg-card bg-linear-to-br from-(--type-color)/10 to-transparent p-4 transition-colors hover:border-(--type-color)/60"
     >
       <div className="flex items-start justify-between">
         {dominantType && <TypeIcon type={dominantType} size="lg" />}
@@ -66,11 +66,17 @@ export default function RecentCollections({
         title="Recent collections"
         description="Grouped by the type of content they mostly hold."
       />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {collections.map((collection) => (
-          <CollectionCard key={collection.id} collection={collection} />
-        ))}
-      </div>
+      {collections.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          No collections yet.
+        </p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {collections.map((collection) => (
+            <CollectionCard key={collection.id} collection={collection} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
