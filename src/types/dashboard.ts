@@ -43,6 +43,7 @@ export interface DashboardItem {
   isPinned: boolean;
   type: TypeSummary;
   collectionNames: string[];
+  tags: string[];
   updatedAt: string;
 }
 
@@ -63,12 +64,7 @@ export interface CollectionStats {
   favoriteCollections: number;
 }
 
-export interface DashboardData {
-  firstName: string;
-  itemStats: Pick<DashboardStats, "items" | "favoriteItems">;
-  pinnedItems: DashboardItem[];
-  recentItems: DashboardItem[];
-}
+export type ItemStats = Pick<DashboardStats, "items" | "favoriteItems">;
 
 export interface SidebarData {
   itemTypes: SidebarItemType[];

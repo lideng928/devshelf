@@ -2,38 +2,40 @@ import { Folder, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatCollectionNames } from "@/lib/format";
-import { ITEM_TYPE_TEXT_CLASSES } from "@/lib/item-types";
+import { typeColorVar } from "@/lib/type-color";
 import type { DashboardItem } from "@/types/dashboard";
 import SectionHeader from "./SectionHeader";
+import TagList from "./TagList";
 import TypeIcon from "./TypeIcon";
 
 function PinnedItemCard({ item }: { item: DashboardItem }) {
   return (
-    <Card className="gap-3 px-4">
+    <Card
+      style={typeColorVar(item.type.color)}
+      className="gap-3 px-4 ring-(--type-color)/30 transition-shadow hover:ring-(--type-color)/60"
+    >
       <div className="flex items-center gap-2">
         <TypeIcon type={item.type} size="sm" />
-        <span
-          className={cn(
-            "text-[11px] font-semibold tracking-wide uppercase",
-            ITEM_TYPE_TEXT_CLASSES[item.type.slug],
-          )}
-        >
-          {item.type.slug}
+        <span className="text-[11px] font-semibold tracking-wide text-(--type-color) uppercase">
+          {item.type.name}
         </span>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate font-semibold">{item.title}</h3>
-        {item.preview && (
-          <p
-            className={cn(
-              "mt-1 line-clamp-2 text-xs text-muted-foreground",
-              item.isCode && "font-mono",
-            )}
-          >
-            {item.preview}
-          </p>
-        )}
+      <div className="min-w-0 flex-1 space-y-2">
+        <div>
+          <h3 className="truncate font-semibold">{item.title}</h3>
+          {item.preview && (
+            <p
+              className={cn(
+                "mt-1 line-clamp-2 text-xs text-muted-foreground",
+                item.isCode && "font-mono",
+              )}
+            >
+              {item.preview}
+            </p>
+          )}
+        </div>
+        <TagList tags={item.tags} />
       </div>
 
       <div className="flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">

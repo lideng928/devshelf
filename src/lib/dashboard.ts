@@ -1,23 +1,16 @@
+// Mock-data helpers for the parts of the dashboard not yet on the database:
+// the sidebar and the greeting.
 import {
   collections,
   currentUser,
   items,
   itemTypes,
   type Collection,
-  type Item,
   type ItemType,
 } from "@/lib/mock-data";
-import type {
-  DashboardData,
-  DashboardItem,
-  SidebarCollection,
-  SidebarData,
-  TypeSummary,
-} from "@/types/dashboard";
+import type { SidebarCollection, SidebarData } from "@/types/dashboard";
 
 const RECENT_COLLECTIONS_LIMIT = 5;
-const RECENT_ITEMS_LIMIT = 10;
-const CODE_TYPE_SLUGS = new Set(["snippet", "command"]);
 
 function byUpdatedAtDesc(a: { updatedAt: string }, b: { updatedAt: string }) {
   return b.updatedAt.localeCompare(a.updatedAt);
@@ -25,10 +18,6 @@ function byUpdatedAtDesc(a: { updatedAt: string }, b: { updatedAt: string }) {
 
 function getType(typeId: string): ItemType | undefined {
   return itemTypes.find((type) => type.id === typeId);
-}
-
-function toTypeSummary(type: ItemType): TypeSummary {
-  return { slug: type.slug, name: type.name, icon: type.icon, color: type.color };
 }
 
 // Item types in a collection, most frequent first.
@@ -90,44 +79,6 @@ export function getSidebarData(): SidebarData {
   };
 }
 
-function getItemPreview(item: Item, isCode: boolean): string | null {
-  if (isCode) return item.content?.split("\n")[0] ?? null;
-  return item.description ?? item.content ?? item.url ?? item.fileName;
-}
-
-function toDashboardItem(item: Item): DashboardItem | null {
-  const type = getType(item.typeId);
-  if (!type) return null;
-
-  const isCode = CODE_TYPE_SLUGS.has(type.slug);
-  return {
-    id: item.id,
-    title: item.title,
-    preview: getItemPreview(item, isCode),
-    isCode,
-    isPinned: item.isPinned,
-    type: toTypeSummary(type),
-    collectionNames: collections
-      .filter((collection) => item.collectionIds.includes(collection.id))
-      .map((collection) => collection.name),
-    updatedAt: item.updatedAt,
-  };
-}
-
-function toDashboardItems(source: Item[]): DashboardItem[] {
-  return source
-    .map(toDashboardItem)
-    .filter((item): item is DashboardItem => item !== null);
-}
-
-export function getDashboardData(): DashboardData {
-  return {
-    firstName: currentUser.name.split(" ")[0],
-    itemStats: {
-      items: items.length,
-      favoriteItems: items.filter((item) => item.isFavorite).length,
-    },
-    pinnedItems: toDashboardItems(items.filter((item) => item.isPinned).sort(byUpdatedAtDesc)),
-    recentItems: toDashboardItems([...items].sort(byUpdatedAtDesc).slice(0, RECENT_ITEMS_LIMIT)),
-  };
+export function getGreetingName(): string {
+  return currentUser.name.split(" ")[0];
 }

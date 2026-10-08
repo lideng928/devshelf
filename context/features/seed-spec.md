@@ -83,3 +83,11 @@ _Description: UI/UX resources and references_
 - Component libraries
 - Design systems
 - Icon libraries
+
+### Pinned, Favorite & Tags
+
+- **Pinned:** "useDebounce and useLocalStorage" (React Patterns), "Code review assistant" (AI Workflows)
+- **Favorite:** "Undo the last commit, keep changes" (Terminal Commands)
+- **Tags** (tag names are unique per user):
+  - "useDebounce and useLocalStorage": react, hooks, typescript
+  - "Next.js production Dockerfile": docker, nextjs, deployment

@@ -1,26 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { TYPE_SELECT, toTypeSummary, type TypeRow } from "@/lib/db/item-types";
 import type { CollectionStats, DashboardCollection, TypeSummary } from "@/types/dashboard";
 
 const RECENT_COLLECTIONS_LIMIT = 6;
-const FALLBACK_TYPE_ICON = "File";
-const FALLBACK_TYPE_COLOR = "#94a3b8";
-
-interface TypeRow {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-  color: string | null;
-}
-
-function toTypeSummary(type: TypeRow): TypeSummary {
-  return {
-    slug: type.slug,
-    name: type.name,
-    icon: type.icon ?? FALLBACK_TYPE_ICON,
-    color: type.color ?? FALLBACK_TYPE_COLOR,
-  };
-}
 
 // Distinct item types in a collection, most-used first.
 function rankTypes(types: TypeRow[]): TypeSummary[] {
@@ -54,7 +36,7 @@ export async function getRecentCollections(
         select: {
           item: {
             select: {
-              type: { select: { id: true, name: true, slug: true, icon: true, color: true } },
+              type: { select: TYPE_SELECT },
             },
           },
         },

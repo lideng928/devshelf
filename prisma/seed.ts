@@ -1,6 +1,6 @@
 // Populates the development database with demo data.
 // Run with: npx prisma db seed
-// Safe to re-run: the demo user's collections and items are recreated each time.
+// Safe to re-run: the demo user's collections, items and tags are recreated each time.
 import "dotenv/config";
 import { randomInt } from "node:crypto";
 import bcrypt from "bcryptjs";
@@ -69,6 +69,18 @@ function getTypeId(typeIds: Map<SystemTypeName, string>, name: SystemTypeName): 
   return id;
 }
 
+// Tag names are unique per user, so reuse the tag if another item created it.
+function toTagLink(name: string, userId: string) {
+  return {
+    tag: {
+      connectOrCreate: {
+        where: { userId_name: { userId, name } },
+        create: { name, user: { connect: { id: userId } } },
+      },
+    },
+  };
+}
+
 async function seedCollection(
   collection: SeedCollection,
   userId: string,
@@ -80,13 +92,14 @@ async function seedCollection(
       description: collection.description,
       user: { connect: { id: userId } },
       items: {
-        create: collection.items.map(({ type, ...item }) => ({
+        create: collection.items.map(({ type, tags = [], ...item }) => ({
           item: {
             create: {
               ...item,
               contentType: "text",
               user: { connect: { id: userId } },
               type: { connect: { id: getTypeId(typeIds, type) } },
+              tags: { create: tags.map((name) => toTagLink(name, userId)) },
             },
           },
         })),
@@ -102,10 +115,12 @@ async function main() {
   const typeIds = await seedSystemTypes();
   console.log(`✔ System item types: ${typeIds.size}`);
 
-  // Deleting items and collections also removes their ItemCollection links.
+  // Deleting items, collections and tags also removes their ItemCollection
+  // and ItemTag links.
   await prisma.$transaction([
     prisma.item.deleteMany({ where: { userId: user.id } }),
     prisma.collection.deleteMany({ where: { userId: user.id } }),
+    prisma.tag.deleteMany({ where: { userId: user.id } }),
   ]);
 
   for (const collection of SEED_COLLECTIONS) {

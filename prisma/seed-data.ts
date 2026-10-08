@@ -32,6 +32,9 @@ export interface SeedItem {
   content?: string;
   url?: string;
   language?: string;
+  tags?: string[];
+  isPinned?: boolean;
+  isFavorite?: boolean;
 }
 
 export interface SeedCollection {
@@ -48,6 +51,8 @@ const reactPatterns: SeedCollection = {
       title: "useDebounce and useLocalStorage",
       type: "snippet",
       language: "typescript",
+      tags: ["react", "hooks", "typescript"],
+      isPinned: true,
       description: "Custom hooks for debounced values and persisted state.",
       content: `import { useEffect, useState } from "react";
 
@@ -151,6 +156,7 @@ const aiWorkflows: SeedCollection = {
     {
       title: "Code review assistant",
       type: "prompt",
+      isPinned: true,
       description: "Thoughtful, actionable reviews of a diff.",
       content: `You are a senior engineer reviewing a pull request.
 
@@ -214,6 +220,7 @@ const devOps: SeedCollection = {
       title: "Next.js production Dockerfile",
       type: "snippet",
       language: "dockerfile",
+      tags: ["docker", "nextjs", "deployment"],
       description: "Multi-stage build using Next.js standalone output.",
       content: `FROM node:22-alpine AS deps
 WORKDIR /app
@@ -265,6 +272,7 @@ const terminalCommands: SeedCollection = {
       title: "Undo the last commit, keep changes",
       type: "command",
       language: "bash",
+      isFavorite: true,
       description: "Moves HEAD back one commit and leaves the changes staged.",
       content: "git reset --soft HEAD~1",
     },
