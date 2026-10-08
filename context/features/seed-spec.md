@@ -28,7 +28,7 @@ Create a seed script (`prisma/seed.ts`) to populate the database with sample dat
 
 Icons are Lucide React component names. All types have `isSystem: true`.
 
-Colors match the current UI theme (the Tailwind classes in `src/lib/item-types.ts`). The URL type is named `url` to match the `Item.url` field in the schema.
+Colors match the current UI theme (the Tailwind palette values in the table). The UI reads each type's `color` and `icon` from the database. The URL type is named `url` to match the `Item.url` field in the schema.
 
 Each type gets a random 6-character slug (lowercase letters and digits), since the schema requires a `slug`.
 
@@ -86,6 +86,7 @@ _Description: UI/UX resources and references_
 
 ### Pinned, Favorite & Tags
 
+- **Favorite collections:** React Patterns, AI Workflows
 - **Pinned:** "useDebounce and useLocalStorage" (React Patterns), "Code review assistant" (AI Workflows)
 - **Favorite:** "Undo the last commit, keep changes" (Terminal Commands)
 - **Tags** (tag names are unique per user):

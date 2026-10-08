@@ -1,8 +1,9 @@
 export interface SidebarItemType {
   id: string;
   name: string;
-  slug: string;
+  label: string;
   icon: string;
+  color: string;
   href: string;
   count: number;
 }
@@ -11,7 +12,8 @@ export interface SidebarCollection {
   id: string;
   name: string;
   href: string;
-  typeSlug: string | null;
+  // Color of the most-used item type; null for an empty collection.
+  color: string | null;
 }
 
 export interface SidebarUser {

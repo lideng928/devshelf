@@ -90,6 +90,7 @@ async function seedCollection(
     data: {
       name: collection.name,
       description: collection.description,
+      isFavorite: collection.isFavorite ?? false,
       user: { connect: { id: userId } },
       items: {
         create: collection.items.map(({ type, tags = [], ...item }) => ({

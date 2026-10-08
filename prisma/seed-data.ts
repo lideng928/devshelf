@@ -14,7 +14,8 @@ export interface SeedItemType {
   color: string;
 }
 
-// Colors match the Tailwind classes in src/lib/item-types.ts.
+// Colors are the UI theme's Tailwind palette values (see seed-spec.md). The UI
+// reads them from the ItemType row.
 export const SYSTEM_ITEM_TYPES: SeedItemType[] = [
   { name: "snippet", icon: "Code", color: "#3b82f6" },
   { name: "prompt", icon: "Sparkles", color: "#8b5cf6" },
@@ -40,12 +41,14 @@ export interface SeedItem {
 export interface SeedCollection {
   name: string;
   description: string;
+  isFavorite?: boolean;
   items: SeedItem[];
 }
 
 const reactPatterns: SeedCollection = {
   name: "React Patterns",
   description: "Reusable React patterns and hooks",
+  isFavorite: true,
   items: [
     {
       title: "useDebounce and useLocalStorage",
@@ -152,6 +155,7 @@ export function groupBy<T, K extends PropertyKey>(list: T[], getKey: (item: T) =
 const aiWorkflows: SeedCollection = {
   name: "AI Workflows",
   description: "AI prompts and workflow automations",
+  isFavorite: true,
   items: [
     {
       title: "Code review assistant",

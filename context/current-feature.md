@@ -1,20 +1,37 @@
 # Current Feature
 
-<!-- Feature Name -->
+Stats & Sidebar (Database)
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
+- Display stats from the database, keeping the current design/layout (already done in the dashboard items feature)
+- Display the system item types in the sidebar with their icons, linking to `/items/[typename]`
+- Show the actual collection data from the database in the sidebar
+- Add a "View all collections" link under the collections list that goes to `/collections`
+- Favorite collections keep a star icon; recent collections show a colored circle based on the most-used item type in that collection
+- Add the database functions to `src/lib/db/items.ts` (using `src/lib/db/collections.ts` for reference)
+
 ## Notes
 
 <!-- Any extra notes -->
+
+- Spec: @context/features/stats-sidebar-spec.md
+- All 4 main-area stats already come from the DB (`getItemStats`, `getCollectionStats`), so this feature only updates the sidebar
+- Type colors and icons come from the `ItemType` row via the `--type-color` CSS variable; the demo user stands in until auth
+- Decisions:
+  - Type links use the type name as stored: `/items/snippet`, `/items/url`, ...; labels are the capitalized plural ("Snippets", "Urls")
+  - System types are listed in the seed-spec order (ItemType has no ordering column), with the user's item count per type
+  - Sidebar shows 5 recent collections; favorites are listed by name, and the group is hidden when there are none (the seed has no favorite collections)
+  - The slug-keyed Tailwind color maps were removed; everything reads colors from the DB now
+  - The sidebar user area and the greeting are still mock data (not in this spec)
 
 ## History
 

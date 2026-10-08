@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Layers } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowRight, LayoutDashboard, Layers, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -18,20 +17,68 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  ITEM_TYPE_BG_CLASSES,
-  ITEM_TYPE_ICONS,
-  ITEM_TYPE_TEXT_CLASSES,
-} from "@/lib/item-types";
-import type { SidebarCollection, SidebarData } from "@/types/dashboard";
+import { ITEM_TYPE_ICONS } from "@/lib/item-types";
+import { typeColorVar } from "@/lib/type-color";
+import type { SidebarCollection, SidebarData, SidebarItemType } from "@/types/dashboard";
+
+const NEUTRAL_COLOR = "var(--color-muted-foreground)";
+
+interface TypesGroupProps {
+  itemTypes: SidebarItemType[];
+  pathname: string;
+}
+
+function TypesGroup({ itemTypes, pathname }: TypesGroupProps) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Types</SidebarGroupLabel>
+      <SidebarMenu>
+        {itemTypes.map((type) => {
+          const Icon = ITEM_TYPE_ICONS[type.icon];
+          return (
+            <SidebarMenuItem key={type.id}>
+              <SidebarMenuButton
+                render={<Link href={type.href} />}
+                isActive={pathname === type.href}
+                tooltip={type.label}
+              >
+                {Icon && <Icon style={typeColorVar(type.color)} className="text-(--type-color)" />}
+                <span>{type.label}</span>
+              </SidebarMenuButton>
+              <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
+            </SidebarMenuItem>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
+
+// Favorites show a star; recents show a dot in their most-used type's color.
+function CollectionMarker({ variant, color }: { variant: "favorite" | "recent"; color: string | null }) {
+  if (variant === "favorite") {
+    return <Star className="fill-amber-400 text-amber-400" />;
+  }
+  return (
+    <span className="flex size-4 shrink-0 items-center justify-center">
+      <span
+        style={typeColorVar(color ?? NEUTRAL_COLOR)}
+        className="size-2 rounded-full bg-(--type-color)"
+      />
+    </span>
+  );
+}
 
 interface CollectionGroupProps {
   label: string;
+  variant: "favorite" | "recent";
   collections: SidebarCollection[];
   pathname: string;
 }
 
-function CollectionGroup({ label, collections, pathname }: CollectionGroupProps) {
+function CollectionGroup({ label, variant, collections, pathname }: CollectionGroupProps) {
+  if (collections.length === 0) return null;
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
@@ -43,19 +90,31 @@ function CollectionGroup({ label, collections, pathname }: CollectionGroupProps)
               isActive={pathname === collection.href}
               tooltip={collection.name}
             >
-              <span className="flex size-4 shrink-0 items-center justify-center">
-                <span
-                  className={cn(
-                    "size-2 rounded-full",
-                    (collection.typeSlug && ITEM_TYPE_BG_CLASSES[collection.typeSlug]) ??
-                      "bg-muted-foreground",
-                  )}
-                />
-              </span>
+              <CollectionMarker variant={variant} color={collection.color} />
               <span>{collection.name}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
+
+function ViewAllCollectionsLink({ pathname }: { pathname: string }) {
+  return (
+    <SidebarGroup className="pt-0">
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            render={<Link href="/collections" />}
+            isActive={pathname === "/collections"}
+            tooltip="View all collections"
+            className="text-muted-foreground"
+          >
+            <ArrowRight />
+            <span>View all collections</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );
@@ -100,38 +159,20 @@ export default function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Types</SidebarGroupLabel>
-          <SidebarMenu>
-            {itemTypes.map((type) => {
-              const Icon = ITEM_TYPE_ICONS[type.icon];
-              return (
-                <SidebarMenuItem key={type.id}>
-                  <SidebarMenuButton
-                    render={<Link href={type.href} />}
-                    isActive={pathname === type.href}
-                    tooltip={type.name}
-                  >
-                    {Icon && <Icon className={ITEM_TYPE_TEXT_CLASSES[type.slug]} />}
-                    <span>{type.name}</span>
-                  </SidebarMenuButton>
-                  <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
+        <TypesGroup itemTypes={itemTypes} pathname={pathname} />
         <CollectionGroup
           label="Favorite Collections"
+          variant="favorite"
           collections={favoriteCollections}
           pathname={pathname}
         />
         <CollectionGroup
           label="Recent Collections"
+          variant="recent"
           collections={recentCollections}
           pathname={pathname}
         />
+        <ViewAllCollectionsLink pathname={pathname} />
       </SidebarContent>
 
       <SidebarFooter>

@@ -1,8 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { TYPE_SELECT, toTypeSummary, type TypeRow } from "@/lib/db/item-types";
-import type { CollectionStats, DashboardCollection, TypeSummary } from "@/types/dashboard";
+import type {
+  CollectionStats,
+  DashboardCollection,
+  SidebarCollection,
+  TypeSummary,
+} from "@/types/dashboard";
 
 const RECENT_COLLECTIONS_LIMIT = 6;
+const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 // Distinct item types in a collection, most-used first.
 function rankTypes(types: TypeRow[]): TypeSummary[] {
@@ -58,6 +64,30 @@ export async function getRecentCollections(
       updatedAt: collection.updatedAt.toISOString(),
     };
   });
+}
+
+export async function getFavoriteCollections(userId: string): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+  return collections.map(({ id, name }) => ({
+    id,
+    name,
+    href: `/collections/${id}`,
+    color: null,
+  }));
+}
+
+export async function getSidebarRecentCollections(userId: string): Promise<SidebarCollection[]> {
+  const collections = await getRecentCollections(userId, SIDEBAR_RECENT_COLLECTIONS_LIMIT);
+  return collections.map(({ id, name, href, dominantType }) => ({
+    id,
+    name,
+    href,
+    color: dominantType?.color ?? null,
+  }));
 }
 
 export async function getCollectionStats(userId: string): Promise<CollectionStats> {
