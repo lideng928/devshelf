@@ -58,7 +58,7 @@ Custom types allowed for Pro users.
 
 ### B) Collections
 
-Organize items—mixed item types allowed.
+Organize items—mixed item types allowed. Items and collections are many-to-many: an item can belong to several collections, and a collection can hold many items.
 
 Examples:
 
@@ -103,7 +103,7 @@ Full‑text search across:
 
 ## 🗄️ Data Model (Rough Prisma Draft)
 
-> This schema is a starting point and **will evolve**
+> This schema is a starting point and **will evolve**. The source of truth is `prisma/schema.prisma`.
 
 ```prisma
 model User {
@@ -141,9 +141,7 @@ model Item {
   typeId      String
   type        ItemType @relation(fields: [typeId], references: [id])
 
-  collectionId String?
-  collection   Collection? @relation(fields: [collectionId], references: [id])
-
+  collections ItemCollection[]
   tags        ItemTag[]
 
   createdAt   DateTime @default(now())
@@ -172,9 +170,21 @@ model Collection {
   userId      String
   user        User @relation(fields: [userId], references: [id])
 
-  items       Item[]
+  items       ItemCollection[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Many-to-many join between Item and Collection
+model ItemCollection {
+  itemId       String
+  collectionId String
+  addedAt      DateTime @default(now())
+
+  item       Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, collectionId])
 }
 
 model Tag {

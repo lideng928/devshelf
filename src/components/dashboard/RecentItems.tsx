@@ -1,7 +1,7 @@
 import { Clock, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatRelativeTime } from "@/lib/format";
+import { formatCollectionNames, formatRelativeTime } from "@/lib/format";
 import type { DashboardItem } from "@/types/dashboard";
 import SectionHeader from "./SectionHeader";
 import TypeIcon from "./TypeIcon";
@@ -36,7 +36,9 @@ export default function RecentItems({ items }: { items: DashboardItem[] }) {
                 )}
               </div>
               <div className="hidden shrink-0 text-right text-xs sm:block">
-                <p className="text-muted-foreground">{item.collectionName ?? "Unsorted"}</p>
+                <p className="text-muted-foreground" title={item.collectionNames.join(", ")}>
+                  {formatCollectionNames(item.collectionNames)}
+                </p>
                 <p className="text-[11px] text-muted-foreground/70">
                   {formatRelativeTime(item.updatedAt)}
                 </p>

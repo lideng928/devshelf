@@ -37,7 +37,7 @@ function toTypeSummary(type: ItemType): TypeSummary {
 function getCollectionTypes(collectionId: string): ItemType[] {
   const counts = new Map<string, number>();
   for (const item of items) {
-    if (item.collectionId === collectionId) {
+    if (item.collectionIds.includes(collectionId)) {
       counts.set(item.typeId, (counts.get(item.typeId) ?? 0) + 1);
     }
   }
@@ -109,7 +109,9 @@ function toDashboardItem(item: Item): DashboardItem | null {
     isCode,
     isPinned: item.isPinned,
     type: toTypeSummary(type),
-    collectionName: collections.find((c) => c.id === item.collectionId)?.name ?? null,
+    collectionNames: collections
+      .filter((collection) => item.collectionIds.includes(collection.id))
+      .map((collection) => collection.name),
     updatedAt: item.updatedAt,
   };
 }
@@ -122,7 +124,7 @@ function toDashboardCollection(collection: Collection): DashboardCollection {
     description: collection.description,
     isFavorite: collection.isFavorite,
     href: `/collections/${collection.id}`,
-    itemCount: items.filter((item) => item.collectionId === collection.id).length,
+    itemCount: items.filter((item) => item.collectionIds.includes(collection.id)).length,
     dominantType: types[0] ?? null,
     types,
     updatedAt: collection.updatedAt,

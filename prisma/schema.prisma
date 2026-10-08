@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Connection URLs live in prisma.config.ts (CLI) and src/lib/prisma.ts (runtime).
+datasource db {
+  provider = "postgresql"
+}
+
+enum ContentType {
+  text
+  file
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  name                 String?
+  email                String    @unique
+  emailVerified        DateTime?
+  image                String?
+  password             String?
+  isPro                Boolean   @default(false)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+
+  accounts    Account[]
+  sessions    Session[]
+  items       Item[]
+  itemTypes   ItemType[]
+  collections Collection[]
+  tags        Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// NextAuth (Auth.js Prisma adapter)
+// ---------------------------------------------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// DevShelf
+// ---------------------------------------------------------------------------
+
+model Item {
+  id          String      @id @default(cuid())
+  title       String
+  contentType ContentType
+  content     String?     @db.Text
+  fileUrl     String?
+  fileName    String?
+  fileSize    Int?
+  url         String?
+  description String?
+  isFavorite  Boolean     @default(false)
+  isPinned    Boolean     @default(false)
+  language    String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // NoAction: a type can't be deleted while items use it, but deleting the
+  // user still cascades through both tables (checked at end of statement).
+  typeId String
+  type   ItemType @relation(fields: [typeId], references: [id], onDelete: NoAction)
+
+  collections ItemCollection[]
+  tags        ItemTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+  @@index([userId, isPinned])
+  @@index([typeId])
+}
+
+// System types have no userId; custom (Pro) types belong to a user.
+model ItemType {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String
+  icon     String?
+  color    String?
+  isSystem Boolean @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items Item[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model Collection {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  isFavorite  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items ItemCollection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+// Many-to-many: an item can be in several collections, and a collection can
+// hold many items. Deleting either side only removes the link.
+model ItemCollection {
+  itemId       String
+  collectionId String
+  addedAt      DateTime @default(now())
+
+  item       Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, collectionId])
+  @@index([collectionId, addedAt])
+}
+
+model Tag {
+  id     String @id @default(cuid())
+  name   String
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items ItemTag[]
+
+  @@unique([userId, name])
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@index([tagId])
+}

@@ -41,7 +41,7 @@ export interface DashboardItem {
   isCode: boolean;
   isPinned: boolean;
   type: TypeSummary;
-  collectionName: string | null;
+  collectionNames: string[];
   updatedAt: string;
 }
 

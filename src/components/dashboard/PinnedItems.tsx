@@ -1,6 +1,7 @@
 import { Folder, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { formatCollectionNames } from "@/lib/format";
 import { ITEM_TYPE_TEXT_CLASSES } from "@/lib/item-types";
 import type { DashboardItem } from "@/types/dashboard";
 import SectionHeader from "./SectionHeader";
@@ -38,7 +39,9 @@ function PinnedItemCard({ item }: { item: DashboardItem }) {
       <div className="flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
         <span className="flex min-w-0 items-center gap-1.5">
           <Folder className="size-3.5 shrink-0" />
-          <span className="truncate">{item.collectionName ?? "Unsorted"}</span>
+          <span className="truncate" title={item.collectionNames.join(", ")}>
+            {formatCollectionNames(item.collectionNames)}
+          </span>
         </span>
         <Pin className="size-3.5 shrink-0 text-primary" />
       </div>
