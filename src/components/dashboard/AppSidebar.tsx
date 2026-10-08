@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, LayoutDashboard, Layers, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +23,19 @@ import { typeColorVar } from "@/lib/type-color";
 import type { SidebarCollection, SidebarData, SidebarItemType } from "@/types/dashboard";
 
 const NEUTRAL_COLOR = "var(--color-muted-foreground)";
+
+// Subtle outline pill next to the label; hidden when the sidebar is collapsed to icons.
+// mr-5 clears the absolutely positioned count badge (SidebarMenuBadge) on the right.
+function ProBadge() {
+  return (
+    <Badge
+      variant="outline"
+      className="mr-5 ml-auto h-4 rounded-sm border-primary/30 px-1 text-[10px] font-semibold tracking-wider text-primary/80 group-data-[collapsible=icon]:hidden"
+    >
+      PRO
+    </Badge>
+  );
+}
 
 interface TypesGroupProps {
   itemTypes: SidebarItemType[];
@@ -44,6 +58,7 @@ function TypesGroup({ itemTypes, pathname }: TypesGroupProps) {
               >
                 {Icon && <Icon style={typeColorVar(type.color)} className="text-(--type-color)" />}
                 <span>{type.label}</span>
+                {type.isPro && <ProBadge />}
               </SidebarMenuButton>
               <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
             </SidebarMenuItem>
