@@ -6,6 +6,7 @@ export interface SidebarItemType {
   color: string;
   href: string;
   count: number;
+  isPro: boolean;
 }
 
 export interface SidebarCollection {

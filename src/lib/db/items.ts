@@ -6,6 +6,8 @@ import type { DashboardItem, ItemStats, SidebarItemType } from "@/types/dashboar
 const RECENT_ITEMS_LIMIT = 10;
 // Matched by type name: DB slugs are random.
 const CODE_TYPE_NAMES = new Set(["snippet", "command"]);
+// Types that need a Pro plan (file uploads). Matched by name: DB slugs are random.
+const PRO_TYPE_NAMES = new Set(["file", "image"]);
 // ItemType has no ordering column; show system types in the seed-spec order.
 const TYPE_DISPLAY_ORDER = ["snippet", "prompt", "command", "note", "file", "image", "url"];
 
@@ -102,6 +104,7 @@ export async function getSidebarItemTypes(userId: string): Promise<SidebarItemTy
         color,
         href: `/items/${type.name}`,
         count: countByType.get(type.id) ?? 0,
+        isPro: PRO_TYPE_NAMES.has(type.name),
       };
     });
 }

@@ -1,12 +1,10 @@
 # Current Feature
 
-<!-- Feature Name -->
-
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+Not Started
 
 ## Goals
 
@@ -31,3 +29,4 @@ Completed
 - Dashboard collections from the database (src/lib/db/collections.ts; 6 recent collections with border/tint from the most-used type's stored color and icons of all types; Collections and Favorite collections stats from the DB; demo user stands in until auth; items still on mock data)
 - Dashboard items from the database (src/lib/db/items.ts; pinned items hidden when empty, 10 recent items, type-colored borders, type labels by name, item tags; all 4 stats from the DB; seed now has 2 pinned items, 1 favorite and tags on 2 items; sidebar and greeting still mock)
 - Stats & sidebar from the database (system item types with stored icons/colors and per-type counts linking to /items/[typename]; favorite collections with stars; 5 recent collections with a dot in the most-used type's color; "View all collections" link to /collections; slug-keyed color maps removed; seed marks React Patterns and AI Workflows as favorites; sidebar user area and greeting still mock)
+- Add Pro badge to sidebar (subtle outline shadcn Badge reading "PRO" on the Files and Images types; `isPro` set in the data layer by type name; hidden when the sidebar is collapsed; known limit: overlaps the count badge at 100+ items)
