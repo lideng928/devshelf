@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
-import { TYPE_SELECT, toTypeSummary, type TypeRow } from "@/lib/db/item-types";
+import { Prisma } from "@/generated/prisma/client";
+import { toTypeSummary, type TypeRow } from "@/lib/db/item-types";
 import type {
   CollectionStats,
   DashboardCollection,
@@ -10,61 +12,67 @@ import type {
 const RECENT_COLLECTIONS_LIMIT = 6;
 const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
-// Distinct item types in a collection, most-used first.
-function rankTypes(types: TypeRow[]): TypeSummary[] {
-  const counts = new Map<string, { type: TypeRow; count: number }>();
-  for (const type of types) {
-    const entry = counts.get(type.id);
-    if (entry) entry.count++;
-    else counts.set(type.id, { type, count: 1 });
+interface CollectionTypeRow extends TypeRow {
+  collectionId: string;
+}
+
+// Distinct item types per collection, most-used first, in one grouped query.
+async function getRankedTypes(collectionIds: string[]): Promise<Map<string, TypeSummary[]>> {
+  const ranked = new Map<string, TypeSummary[]>();
+  if (collectionIds.length === 0) return ranked;
+
+  const rows = await prisma.$queryRaw<CollectionTypeRow[]>`
+    SELECT ic."collectionId", t.id, t.name, t.slug, t.icon, t.color
+    FROM "ItemCollection" ic
+    JOIN "Item" i ON i.id = ic."itemId"
+    JOIN "ItemType" t ON t.id = i."typeId"
+    WHERE ic."collectionId" IN (${Prisma.join(collectionIds)})
+    GROUP BY ic."collectionId", t.id
+    ORDER BY ic."collectionId", COUNT(*) DESC, t.name
+  `;
+
+  for (const { collectionId, ...type } of rows) {
+    const types = ranked.get(collectionId) ?? [];
+    types.push(toTypeSummary(type));
+    ranked.set(collectionId, types);
   }
-
-  return [...counts.values()]
-    .sort((a, b) => b.count - a.count)
-    .map(({ type }) => toTypeSummary(type));
+  return ranked;
 }
 
-export async function getRecentCollections(
-  userId: string,
-  limit = RECENT_COLLECTIONS_LIMIT,
-): Promise<DashboardCollection[]> {
-  const collections = await prisma.collection.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    take: limit,
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      isFavorite: true,
-      updatedAt: true,
-      items: {
-        select: {
-          item: {
-            select: {
-              type: { select: TYPE_SELECT },
-            },
-          },
-        },
+// Cached per request: the dashboard layout (sidebar) and page both use it.
+export const getRecentCollections = cache(
+  async (userId: string): Promise<DashboardCollection[]> => {
+    const collections = await prisma.collection.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      take: RECENT_COLLECTIONS_LIMIT,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isFavorite: true,
+        updatedAt: true,
+        _count: { select: { items: true } },
       },
-    },
-  });
+    });
+    const rankedTypes = await getRankedTypes(collections.map(({ id }) => id));
 
-  return collections.map((collection) => {
-    const types = rankTypes(collection.items.map(({ item }) => item.type));
-    return {
-      id: collection.id,
-      name: collection.name,
-      description: collection.description,
-      isFavorite: collection.isFavorite,
-      href: `/collections/${collection.id}`,
-      itemCount: collection.items.length,
-      dominantType: types[0] ?? null,
-      types,
-      updatedAt: collection.updatedAt.toISOString(),
-    };
-  });
-}
+    return collections.map((collection) => {
+      const types = rankedTypes.get(collection.id) ?? [];
+      return {
+        id: collection.id,
+        name: collection.name,
+        description: collection.description,
+        isFavorite: collection.isFavorite,
+        href: `/collections/${collection.id}`,
+        itemCount: collection._count.items,
+        dominantType: types[0] ?? null,
+        types,
+        updatedAt: collection.updatedAt.toISOString(),
+      };
+    });
+  },
+);
 
 export async function getFavoriteCollections(userId: string): Promise<SidebarCollection[]> {
   const collections = await prisma.collection.findMany({
@@ -81,8 +89,8 @@ export async function getFavoriteCollections(userId: string): Promise<SidebarCol
 }
 
 export async function getSidebarRecentCollections(userId: string): Promise<SidebarCollection[]> {
-  const collections = await getRecentCollections(userId, SIDEBAR_RECENT_COLLECTIONS_LIMIT);
-  return collections.map(({ id, name, href, dominantType }) => ({
+  const collections = await getRecentCollections(userId);
+  return collections.slice(0, SIDEBAR_RECENT_COLLECTIONS_LIMIT).map(({ id, name, href, dominantType }) => ({
     id,
     name,
     href,

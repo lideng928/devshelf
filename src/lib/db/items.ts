@@ -4,6 +4,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import type { DashboardItem, ItemStats, SidebarItemType } from "@/types/dashboard";
 
 const RECENT_ITEMS_LIMIT = 10;
+const PINNED_ITEMS_LIMIT = 8;
+// Cards show 1-2 lines; don't send whole notes or prompts to the page.
+const PREVIEW_MAX_LENGTH = 200;
 // Matched by type name: DB slugs are random.
 const CODE_TYPE_NAMES = new Set(["snippet", "command"]);
 // Types that need a Pro plan (file uploads). Matched by name: DB slugs are random.
@@ -34,8 +37,10 @@ const DASHBOARD_ITEM_SELECT = {
 type DashboardItemRow = Prisma.ItemGetPayload<{ select: typeof DASHBOARD_ITEM_SELECT }>;
 
 function getPreview(item: DashboardItemRow, isCode: boolean): string | null {
-  if (isCode) return item.content?.split("\n")[0] ?? null;
-  return item.description ?? item.content ?? item.url ?? item.fileName;
+  const preview = isCode
+    ? (item.content?.split("\n")[0] ?? null)
+    : (item.description ?? item.content ?? item.url ?? item.fileName);
+  return preview?.slice(0, PREVIEW_MAX_LENGTH) ?? null;
 }
 
 function toDashboardItem(item: DashboardItemRow): DashboardItem {
@@ -53,10 +58,14 @@ function toDashboardItem(item: DashboardItemRow): DashboardItem {
   };
 }
 
-export async function getPinnedItems(userId: string): Promise<DashboardItem[]> {
+export async function getPinnedItems(
+  userId: string,
+  limit = PINNED_ITEMS_LIMIT,
+): Promise<DashboardItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, isPinned: true },
     orderBy: { updatedAt: "desc" },
+    take: limit,
     select: DASHBOARD_ITEM_SELECT,
   });
   return items.map(toDashboardItem);
