@@ -19,6 +19,22 @@ Read the following to get the full context of the project:
 - `npm run lint` — ESLint (flat config with `eslint-config-next` core-web-vitals + typescript)
 - `npx tsc --noEmit` — type check
 
+## Neon Database (MCP)
+
+- **Project:** `devshelf` (`sweet-queen-37079194`)
+- **Development branch:** `development` (`br-patient-night-b87uy7nb`) is the ONLY branch to use
+- **Production branch:** `production` (`br-patient-dew-b8q5oamm`) is OFF LIMITS
+
+Rules for every Neon MCP tool call:
+
+- Always pass `branch_id: "br-patient-night-b87uy7nb"` explicitly. Never leave `branch_id` out: the default branch is production.
+- Never read, query, write, migrate, reset, restore, or delete anything on the production branch, even when asked indirectly (e.g. "check the database"). Use development.
+- If a task seems to need production, stop and ask first. Don't fall back to it on your own.
+- Never change the default branch, and never delete or reset either branch.
+- Before running a migration or destructive SQL (DELETE, DROP, TRUNCATE, UPDATE without a narrow WHERE) on development, show the statement and ask for confirmation.
+
+These rules are enforced by a `PreToolUse` hook (`.claude/hooks/neon-guard.js`, registered in `.claude/settings.json`) that blocks Neon calls targeting production or missing the development `branch_id`. If the development branch is recreated, update `DEV_BRANCH_ID` in that script.
+
 
 
 
